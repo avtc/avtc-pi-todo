@@ -1,0 +1,65 @@
+{
+  "name": "avtc-pi-todo",
+  "version": "1.0.3",
+  "description": "A working-memory plan the agent manages — breaks multi-stage work into items when needed, and completing each surfaces the next's details to keep the agent on track.",
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ],
+    "allowedCodeDeps": [
+      "avtc-pi-settings-ui"
+    ]
+  },
+  "keywords": [
+    "pi-package",
+    "pi-extension"
+  ],
+  "scripts": {
+    "lint": "biome check .",
+    "lint:optional-params": "node scripts/no-optional-params.cjs src/ tests/",
+    "lint:bare-literals": "node scripts/no-bare-literals.cjs src/ index.ts",
+    "lint:design-refs": "node scripts/no-design-refs.cjs src/ index.ts README.md",
+    "lint:bundled-imports": "node scripts/no-bundled-extension-imports.cjs src/ index.ts",
+    "knip": "knip --production",
+    "typecheck": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc.tsbuildinfo",
+    "test:unit": "node scripts/test-low-priority.cjs vitest run",
+    "test:watch": "node scripts/test-low-priority.cjs vitest",
+    "test": "node scripts/test-low-priority.cjs \"node scripts/run-parallel.cjs \"npm run lint:optional-params :: npm run lint:bare-literals :: npm run lint:design-refs :: npm run lint:as-never :: npm run lint:bundled-imports :: npm run lint :: npm run typecheck :: npm run knip :: npm run dupes\" && vitest run\"",
+    "dupes": "jscpd src/ --exit-code --threshold 0.01",
+    "lint:as-never": "node scripts/no-as-never.cjs src/ tests/ index.ts"
+  },
+  "dependencies": {
+    "avtc-pi-settings-ui": "^1.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.0",
+    "@earendil-works/pi-ai": "^0.80.2",
+    "@earendil-works/pi-coding-agent": "^0.80.2",
+    "@earendil-works/pi-tui": "^0.80.2",
+    "@types/node": "^25.9.3",
+    "jscpd": "^5.0.10",
+    "knip": "^6.17.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  },
+  "author": "avtc <tarasenkov@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/avtc/avtc-pi-todo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/avtc/avtc-pi-todo/issues"
+  },
+  "homepage": "https://github.com/avtc/avtc-pi-todo",
+  "files": [
+    "index.ts",
+    "src/",
+    "assets/",
+    "LICENSE",
+    "README.md"
+  ]
+}
