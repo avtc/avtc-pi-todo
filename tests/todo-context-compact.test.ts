@@ -514,6 +514,46 @@ describe("todo tool — context compact on complete", () => {
     expect(sendUserMessageMock.mock.calls[0][0]).toContain("d");
   });
 
+  test("setting=compact>75K: concurrent completes in one turn trigger compact only once (re-entrancy guard)", async () => {
+    // The reservation is set synchronously (before the getContextUsage await) so concurrent
+    // todo_complete calls in one turn can't all pass the guard and each fire ctx.compact().
+    const { tools, ctx, compactMock } = setupTool(NO_SETUP_TOOL_OPTIONS);
+    setTodoSetting("todoItemCompleteContextCompact", "compact>75K");
+
+    // Defer getContextUsage resolution so both completes interleave at the await.
+    const resolvers: Array<(v: { tokens: number; contextWindow: number; percent: number }) => void> = [];
+    ctx.getContextUsage = (() =>
+      new Promise<{ tokens: number; contextWindow: number; percent: number }>((resolve) => {
+        resolvers.push(resolve);
+      })) as unknown as typeof ctx.getContextUsage;
+
+    await tools.init.execute(
+      "c1",
+      {
+        items: [
+          { name: "A", details: "a" },
+          { name: "B", details: "b" },
+          { name: "C", details: "c" },
+        ],
+      },
+      undefined,
+      undefined,
+      ctx,
+    );
+
+    // Fire two completes CONCURRENTLY — both reach maybeCompactAfterComplete this microtask.
+    const p1 = tools.complete.execute("c2", { id: "1" }, undefined, undefined, ctx);
+    const p2 = tools.complete.execute("c3", { id: "2" }, undefined, undefined, ctx);
+
+    // Release any suspended getContextUsage calls.
+    for (const r of resolvers) r({ tokens: 100000, contextWindow: 200000, percent: 50 });
+    await Promise.all([p1, p2]);
+
+    // Only ONE compact fires — the synchronous reservation blocks the second complete at
+    // the guard before it reaches getContextUsage.
+    expect(compactMock).toHaveBeenCalledTimes(1);
+  });
+
   test("setting=compact: onError resets guard, allowing subsequent complete to trigger compact again", async () => {
     vi.useFakeTimers();
     const { tools, ctx, compactMock, sendUserMessageMock } = setupTool(NO_SETUP_TOOL_OPTIONS);

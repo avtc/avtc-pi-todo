@@ -9,7 +9,7 @@
  * message delivery strategy is controlled by builtInFollowUpDisabled flag.
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type { ContextUsage, ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { formatAllDoneSummary, formatItemList, formatItemListWithDetails, STATUS_ICONS } from "./format.js";
 import { findSubtreeEndIndex, getParentId, isDescendantOf, isTerminal } from "./id-helpers.js";
 import { renumberTree } from "./renumbering.js";
@@ -168,8 +168,9 @@ export async function maybeCompactAfterComplete(
   if (!getPromotedItem()) return false;
   if (resetSetting === "none") return false;
 
-  // Guard: skip if compact is already in-flight (prevents duplicate compaction
-  // when multiple todo_complete calls execute in the same turn)
+  // Re-entrancy guard: at most one compact per turn. The reservation is set synchronously
+  // (before any await) so concurrent todo_complete calls in the same turn can't all pass
+  // this check while awaiting getContextUsage and fire N concurrent ctx.compact() calls.
   if (pendingCompact.value) {
     return false;
   }
@@ -177,12 +178,25 @@ export async function maybeCompactAfterComplete(
   const { mode, threshold } = parseContextCompactValue(resetSetting);
   if (mode !== "compact") return false;
 
+  // Reserve before the first await. Every non-trigger exit below MUST release the reservation,
+  // or the guard leaks and blocks all future compaction.
+  pendingCompact.value = true;
+
   // Check threshold if applicable
   if (threshold !== null) {
-    const usage = ctx.getContextUsage ? await ctx.getContextUsage() : null;
+    let usage: ContextUsage | null = null;
+    if (ctx.getContextUsage) {
+      try {
+        usage = (await ctx.getContextUsage()) ?? null;
+      } catch (err) {
+        pendingCompact.value = false;
+        throw err;
+      }
+    }
     const tokens = usage?.tokens ?? lastKnownTokens.value;
     if (!tokens || tokens <= threshold) {
       if (usage?.tokens) lastKnownTokens.value = usage.tokens;
+      pendingCompact.value = false;
       return false;
     }
     lastKnownTokens.value = tokens;
@@ -204,9 +218,7 @@ export async function maybeCompactAfterComplete(
   };
 
   try {
-    // Mark compact as in-flight to block duplicate triggers
-    pendingCompact.value = true;
-
+    // pendingCompact was reserved above (before the getContextUsage await).
     // Reset cache to null to avoid compact loop after this compact completes
     lastKnownTokens.value = null;
 
