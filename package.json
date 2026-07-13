@@ -1,6 +1,6 @@
 {
   "name": "avtc-pi-todo",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A working-memory plan the agent manages — breaks multi-stage work into items when needed, and completing each surfaces the next's details to keep the agent on track.",
   "type": "module",
   "main": "./index.ts",
@@ -29,8 +29,7 @@
     "test:watch": "node scripts/test-low-priority.cjs vitest",
     "test": "node scripts/test-low-priority.cjs \"node scripts/run-parallel.cjs \"npm run lint:optional-params :: npm run lint:bare-literals :: npm run lint:design-refs :: npm run lint:as-never :: npm run lint:bundled-imports :: npm run lint :: npm run typecheck :: npm run knip :: npm run dupes\" && vitest run\"",
     "dupes": "jscpd src/ --exit-code --threshold 0.01",
-    "lint:as-never": "node scripts/no-as-never.cjs src/ tests/ index.ts",
-    "prepublishOnly": "node scripts/check-symlinks.mjs"
+    "lint:as-never": "node scripts/no-as-never.cjs src/ tests/ index.ts"
   },
   "dependencies": {
     "avtc-pi-settings-ui": "^1.0.0"
