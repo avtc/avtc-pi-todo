@@ -162,7 +162,7 @@ describe("todo tool — context compact on complete", () => {
   });
 
   test("setting=compact with builtInFollowUpDisabled: onError resumes the agent (host does not see compaction errors)", async () => {
-    // The host (feature-flow) only resumes on SUCCESS via its global session_compact handler.
+    // The host (featyard) only resumes on SUCCESS via its global session_compact handler.
     // On error/cancel, session_compact never fires, so nothing else resumes the agent —
     // todo's onError must resume directly to avoid a stall in the main session.
     const { tools, ctx, compactMock, sendUserMessageMock } = setupTool({ builtInFollowUpDisabled: true });
