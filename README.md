@@ -20,6 +20,12 @@ Initialize a list, add items, and decompose into sub-steps:
 
 ![todo init and add](assets/images/todo_init_add.png)
 
+## Installation
+
+```bash
+pi install npm:avtc-pi-todo
+```
+
 ## Tools
 
 | Tool | Description |
@@ -53,12 +59,6 @@ Settings live in `~/.pi/agent/avtc-pi-todo-settings.json` (global) or `<cwd>/.pi
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `todoItemCompleteContextCompact` | string | `"none"` | Context compact after item complete: `"none"` (no compact), `"compact"` (force compact), `"compact>75K"`, `"compact>125K"`, `"compact>200K"`, `"compact>500K"` (compact only if context exceeds threshold) |
-
-## Installation
-
-```bash
-pi install npm:avtc-pi-todo
-```
 
 ## Full suite
 
