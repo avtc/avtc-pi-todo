@@ -3,12 +3,30 @@
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
+/** A single todo item, as a read-only shallow copy (parentId normalized to
+ *  string | null). Returned by `TodoReadyApi.getItems`. */
+export interface TodoReadyItem {
+  id: string;
+  parentId: string | null;
+  name: string;
+  details: string;
+  status: string;
+}
+
+/** Status filter for `getItems`. `"completed"` includes decomposed (folder)
+ *  items. */
+export type TodoItemsStatus = "pending" | "in_progress" | "completed";
+
 /** API object emitted on the `pi-todo:ready` event. */
 export interface TodoReadyApi {
   disableBuiltInFollowUp: () => void;
   getCompletedItemId?: () => string | null;
   getInProgressItem?: () => string | null;
   areAllTodosDone?: () => boolean;
+  /** Read-only full list getter. `null` returns all items; a status filter
+   *  narrows by status (completed includes decomposed). May be absent on older
+   *  bridges — the proxy returns `[]` then. */
+  getItems?: (filter: { status: TodoItemsStatus } | null) => readonly TodoReadyItem[];
 }
 
 /**
@@ -16,10 +34,12 @@ export interface TodoReadyApi {
  * Reload-safe: session_shutdown fires before reload, cleaning all listeners.
  * Copy this file into your consumer's src/snippets/vendored/ directory verbatim — no changes needed.
  *
- * Returns sync lazy proxy — getCompletedItemId, getInProgressItem and areAllTodosDone delegate to
+ * Returns sync lazy proxy — getCompletedItemId, getInProgressItem, areAllTodosDone and getItems delegate to
  * internal _api ref populated when :ready fires at session_start.
  * disableBuiltInFollowUp is passed as a boolean flag, applied inside :ready handler.
  * No pending queue needed — the flag is evaluated when _api is available.
+ * Before :ready fires (or when the bridge is absent/older): getItems returns [], getCompletedItemId/getInProgressItem
+ * return null, areAllTodosDone returns true (safe defaults — graceful degrade).
  */
 export function subscribeToTodo(
   pi: ExtensionAPI,
@@ -28,6 +48,7 @@ export function subscribeToTodo(
   getCompletedItemId(): string | null;
   getInProgressItem(): string | null;
   areAllTodosDone(): boolean;
+  getItems(filter: { status: TodoItemsStatus } | null): readonly TodoReadyItem[];
 } {
   const unsubs: Array<() => void> = [];
 
@@ -58,6 +79,9 @@ export function subscribeToTodo(
     },
     areAllTodosDone(): boolean {
       return _api?.areAllTodosDone?.() ?? true;
+    },
+    getItems(filter: { status: TodoItemsStatus } | null): readonly TodoReadyItem[] {
+      return _api?.getItems?.(filter) ?? [];
     },
   };
 }

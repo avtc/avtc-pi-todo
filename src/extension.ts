@@ -66,6 +66,21 @@ export interface PiTodoApi {
   /** Check if all todo items are in a terminal state (completed or decomposed).
    *  Returns true when there are no items. */
   areAllTodosDone(): boolean;
+  /** Read the todo list, optionally filtered by status. `filter` null returns
+   *  all; `status: "completed"` includes decomposed (folder) items. Returns
+   *  shallow copies (read-only — mutating a returned item does not touch the
+   *  live list). */
+  getItems(filter: { status: "pending" | "in_progress" | "completed" } | null): readonly TodoApiItem[];
+}
+
+/** Item shape returned by `getItems` — a shallow, read-only copy of a stored
+ *  item with `parentId` normalized to `string | null`. */
+export interface TodoApiItem {
+  id: string;
+  parentId: string | null;
+  name: string;
+  details: string;
+  status: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -201,6 +216,20 @@ export default function todoExtension(pi: ExtensionAPI): void {
     areAllTodosDone(): boolean {
       if (items.length === 0) return true;
       return items.every((i) => isTerminal(i.status));
+    },
+    getItems(filter) {
+      const filtered =
+        filter === null
+          ? items
+          : items.filter((i) => (filter.status === "completed" ? isTerminal(i.status) : i.status === filter.status));
+      // shallow copies with parentId normalized to string | null (read-only)
+      return filtered.map((i) => ({
+        id: i.id,
+        parentId: i.parentId ?? null,
+        name: i.name,
+        details: i.details,
+        status: i.status,
+      }));
     },
   };
 
