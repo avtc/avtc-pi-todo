@@ -1,6 +1,6 @@
 {
   "name": "avtc-pi-todo",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A working-memory plan the agent manages — breaks multi-stage work into items when needed, and completing each surfaces the next's details to keep the agent on track.",
   "type": "module",
   "main": "./index.ts",
@@ -32,13 +32,13 @@
     "lint:as-never": "node scripts/no-as-never.cjs src/ tests/ index.ts"
   },
   "dependencies": {
-    "avtc-pi-settings-ui": "^1.0.6"
+    "avtc-pi-settings-ui": "^1.0.8"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.0",
-    "@earendil-works/pi-ai": "^0.80.6",
-    "@earendil-works/pi-coding-agent": "^0.80.6",
-    "@earendil-works/pi-tui": "^0.80.6",
+    "@earendil-works/pi-ai": "^0.84.1",
+    "@earendil-works/pi-coding-agent": "^0.84.1",
+    "@earendil-works/pi-tui": "^0.84.1",
     "@types/node": "^25.9.3",
     "jscpd": "^5.0.10",
     "knip": "^6.17.1",
