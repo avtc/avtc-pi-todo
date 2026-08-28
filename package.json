@@ -1,6 +1,6 @@
 {
   "name": "avtc-pi-todo",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A working-memory plan the agent manages — breaks multi-stage work into items when needed, and completing each surfaces the next's details to keep the agent on track.",
   "type": "module",
   "main": "./index.ts",
@@ -11,7 +11,8 @@
     ],
     "allowedCodeDeps": [
       "avtc-pi-settings-ui"
-    ]
+    ],
+    "image": "https://raw.githubusercontent.com/avtc/avtc-pi-todo/main/assets/images/todo-list-command.png"
   },
   "keywords": [
     "pi-package",
