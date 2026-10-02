@@ -1,6 +1,6 @@
 {
   "name": "avtc-pi-todo",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "A working-memory plan the agent manages — breaks multi-stage work into items when needed, and completing each surfaces the next's details to keep the agent on track.",
   "type": "module",
   "main": "./index.ts",
@@ -33,7 +33,7 @@
     "lint:as-never": "node scripts/no-as-never.cjs src/ tests/ index.ts"
   },
   "dependencies": {
-    "avtc-pi-settings-ui": "^1.0.8"
+    "avtc-pi-settings-ui": "^1.0.12"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.0",
